@@ -1,20 +1,29 @@
 #include <iostream>
 #include <cmath>
+
 #include <opencv2/opencv.hpp>
 
+#include "baseapi.h"
+#include "pageiterator.h"
+#include "resultiterator.h"
+#include "renderer.h"
+#include "platform.h"
+
+#include "distance.h"
+#include "ocr.h"
+
 #define ELEMENTSOF(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+#define TMP_FILENAME "/tmp/ocr.tiff"
 
 using namespace std;
 using namespace cv;
 
 #define EDGE_DETECTION_SIZE 500
 #define CONTOUR_COUNT 5
-
-template <typename T> float pythagorean_distance(const Point_<T> p1, const Point_<T> p2)
-{
-	T xdiff = p2.x - p1.x, ydiff = p2.y - p1.y;
-	return sqrt(xdiff * xdiff + ydiff * ydiff);
-}
+#if 0
+#define DISPLAY_INTERMEDIATE_IMAGES
+#endif
 
 template <typename T> void dump_array_n(const string &name, const T *pts, unsigned int size)
 {
@@ -92,7 +101,7 @@ template <typename T> void four_point_transform(const Mat &image, const array<Po
 	array<Point_<T>, 4> rect;
     order_points(pts, rect);
     // dump_point_array("four_point_transform rect", rect);
-    Point_<T> tl = rect[0], tr = rect[1], br = rect[2], bl = rect[3];
+    const Point_<T> &tl = rect[0], &tr = rect[1], &br = rect[2], &bl = rect[3];
 
     // compute the width of the new image, which will be the
     // maximum distance between bottom-right and bottom-left
@@ -115,12 +124,16 @@ template <typename T> void four_point_transform(const Mat &image, const array<Po
     // compute the perspective transform matrix and then apply it
     Mat M = getPerspectiveTransform(&rect[0], &dst[0]);
     // cerr << "Matrix: " << M << endl;
+    // display_image("Perspective input", image);
     warpPerspective(image, warped, M, Size(maxWidth, maxHeight));
+    // display_image("Perspective output", warped);
 }
 
 static void process(Mat &image)
 {
+#ifdef DISPLAY_INTERMEDIATE_IMAGES
 	display_image("Original", image);
+#endif /* DISPLAY_INTERMEDIATE_IMAGES */
 	Mat smaller;
 	float ratio;
 	if (image.size().width > EDGE_DETECTION_SIZE || image.size().height > EDGE_DETECTION_SIZE) {
@@ -132,7 +145,9 @@ static void process(Mat &image)
 		ratio = 1;
 		smaller = image;
 	}
+#ifdef DISPLAY_INTERMEDIATE_IMAGES
 	display_image("Work", smaller);
+#endif /* DISPLAY_INTERMEDIATE_IMAGES */
 	// Convert inplace to greyscale for contour detection
 	cvtColor(smaller, smaller, COLOR_BGR2GRAY);
 	// Remove high frequency noise
@@ -140,11 +155,12 @@ static void process(Mat &image)
 	// Find edges using Canny
 	Mat edges;
 	Canny(smaller, edges, 75, 200);
+#ifdef DISPLAY_INTERMEDIATE_IMAGES
 	display_image("Edges", edges);
+#endif /* DISPLAY_INTERMEDIATE_IMAGES */
 	// Find contours in edge image
 	vector<vector<Point> > contours;
-	// TODO: CV_RETR_EXTERNAL is sufficient and faster
-	findContours(edges, contours, CV_RETR_EXTERNAL /*CV_RETR_LIST */, CV_CHAIN_APPROX_SIMPLE);
+	findContours(edges, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 	// Sort the contours in decreasing area
 	sort(contours.begin(), contours.end(), [](const vector<Point>& c1, const vector<Point>& c2){
 		return contourArea(c1, false) > contourArea(c2, false);
@@ -170,7 +186,9 @@ static void process(Mat &image)
 	// cerr << "border_idx: " << border_idx << endl;
 	assert((quadrilateral == NULL) == (border_idx == -1));
 	drawContours(smaller, contours, border_idx, Scalar(255, 0, 0), CV_FILLED);
+#ifdef DISPLAY_INTERMEDIATE_IMAGES
 	display_image("Contours", smaller);
+#endif /* DISPLAY_INTERMEDIATE_IMAGES */
 
 	// Warp image
 	if (quadrilateral) {
@@ -190,7 +208,11 @@ static void process(Mat &image)
 		border_arr[2] = (*quadrilateral)[2];
 		border_arr[3] = (*quadrilateral)[3];
 		four_point_transform(image, border_arr, warped);
+// #ifdef DISPLAY_INTERMEDIATE_IMAGES
 		display_image("Corrected", warped);
+// #endif /* DISPLAY_INTERMEDIATE_IMAGES */
+		imwrite(TMP_FILENAME, warped);
+		ocr(TMP_FILENAME);
 	}
 }
 
