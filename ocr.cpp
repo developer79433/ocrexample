@@ -10,14 +10,19 @@ using namespace tesseract;
 
 namespace ocr {
 
-Recogniser::Recogniser(const char *lang) : api(NULL), image(NULL)
+Recogniser::Recogniser(const char *data_dir, const char *lang) : api(NULL), image(NULL)
 {
     api = new TessBaseAPI();
-    // Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init(NULL, lang)) {
-        cerr << "Could not initialize tesseract." << endl;
-        delete api;
-        api = NULL;
+    if (api->Init(data_dir, lang)) {
+		cerr
+		>> "Could not initialize tesseract with language " << lang
+		<< " and data directory "
+		<< (data_dir ? "" : "'")
+		<< (data_dir || "<default>")
+		<< (data_dir ? "" : "'")
+		<< endl;
+		delete api;
+		api = NULL;
     }
 }
 

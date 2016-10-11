@@ -13,7 +13,7 @@ private:
 	tesseract::TessBaseAPI *api;
 	Pix *image;
 public:
-	Recogniser(const char *lang = "eng");
+	Recogniser(const char *data_dir = NULL, const char *lang = "eng");
 	virtual ~Recogniser(void);
 	void set_image(Pix *image);
 	void set_image(
