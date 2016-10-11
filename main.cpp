@@ -6,8 +6,7 @@
 #include "distance.h"
 #include "ocr.h"
 #include "debug.h"
-
-#define ELEMENTSOF(arr) (sizeof(arr) / sizeof((arr)[0]))
+#include "util.h"
 
 // TODO: Use cv::imencode and tesseract::TessBaseAPI::SetImage to communicate via an in-memory buffer
 #define TMP_FILENAME "/tmp/ocr.tiff"
