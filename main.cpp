@@ -15,6 +15,7 @@
 
 #define ELEMENTSOF(arr) (sizeof(arr) / sizeof((arr)[0]))
 
+// TODO: Use cv::imencode and tesseract::TessBaseAPI::SetImage to communicate via an in-memory buffer
 #define TMP_FILENAME "/tmp/ocr.tiff"
 
 using namespace std;
@@ -22,7 +23,7 @@ using namespace cv;
 
 #define EDGE_DETECTION_SIZE 500
 #define CONTOUR_COUNT 5
-#if 0
+#if 1
 #define DISPLAY_INTERMEDIATE_IMAGES
 #endif
 
@@ -176,9 +177,10 @@ static void process(Mat &image)
 	}
 }
 
-int main(int argc, char *argv[])
+static int process_cmdline_args(int argc, char *argv[])
 {
 	char **arg;
+	int ret = EXIT_SUCCESS;
 
 	for (arg = &argv[1]; arg < &argv[argc]; arg++) {
 		Mat input = imread(*arg);
@@ -186,7 +188,33 @@ int main(int argc, char *argv[])
 			process(input);
 		} else {
 			cerr << "Failed to load image from " << *arg << endl;
+			ret = EXIT_FAILURE;
+			break;
 		}
+	}
+
+	return ret;
+}
+
+static int process_camera(void)
+{
+	VideoCapture cap(0);
+	if (!cap.isOpened()) {
+		return EXIT_FAILURE;
+	}
+	Mat frame;
+	cap >> frame;
+	process(frame);
+
+	return EXIT_SUCCESS;
+}
+
+int main(int argc, char *argv[])
+{
+	if (argc > 1) {
+		return process_cmdline_args(argc, argv);
+	} else {
+		process_camera();
 	}
 
 	return EXIT_SUCCESS;
