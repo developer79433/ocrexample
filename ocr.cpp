@@ -15,7 +15,7 @@ Recogniser::Recogniser(const char *data_dir, const char *lang) : api(NULL), imag
     api = new TessBaseAPI();
     if (api->Init(data_dir, lang)) {
 		cerr
-		>> "Could not initialize tesseract with language " << lang
+		<< "Could not initialize tesseract with language " << lang
 		<< " and data directory "
 		<< (data_dir ? "" : "'")
 		<< (data_dir || "<default>")
