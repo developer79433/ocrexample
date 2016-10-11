@@ -213,9 +213,6 @@ int main(int argc, char *argv[])
 {
 	if (argc > 1) {
 		return process_cmdline_args(argc, argv);
-	} else {
-		process_camera();
 	}
-
-	return EXIT_SUCCESS;
+	return process_camera();
 }
