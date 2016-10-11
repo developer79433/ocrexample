@@ -20,6 +20,7 @@
 
 using namespace std;
 using namespace cv;
+using namespace ocr;
 
 #define EDGE_DETECTION_SIZE 500
 #define CONTOUR_COUNT 5
@@ -173,7 +174,10 @@ static void process(Mat &image)
 		display_image("Corrected", warped);
 // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
 		imwrite(TMP_FILENAME, warped);
-		ocr(TMP_FILENAME);
+		vector<uchar> buf;
+		imencode("tiff", warped, buf);
+		Recogniser tess;
+		tess.set_image(&buf[0], warped.size().width, warped.size().height, 3, 3 * warped.size().width);
 	}
 }
 

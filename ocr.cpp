@@ -6,19 +6,66 @@
 #include <iostream>
 
 using namespace std;
+using namespace tesseract;
 
-void ocr(const char *filename)
+namespace ocr {
+
+Recogniser::Recogniser(const char *lang) : api(NULL), image(NULL)
 {
-    tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+    api = new TessBaseAPI();
     // Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init(NULL, "eng")) {
+    if (api->Init(NULL, lang)) {
         cerr << "Could not initialize tesseract." << endl;
-        exit(1);
+        delete api;
+        api = NULL;
     }
+}
 
-    // Open input image with leptonica library
-    Pix *image = pixRead(filename);
+Recogniser::~Recogniser(void)
+{
+	if (api) {
+		api->End();
+		delete api;
+		api = NULL;
+	}
+	if (image) {
+	    pixDestroy(&image);
+	    image = NULL;
+	}
+}
+
+void Recogniser::set_image(Pix *image)
+{
+	// Don't set self->image, because we don't own it
     api->SetImage(image);
+}
+
+void Recogniser::set_image(
+	const unsigned char *imagedata,
+	int width,
+	int height,
+	int bytes_per_pixel,
+	int bytes_per_line
+)
+{
+	// Don't set self->image, because it is being bypassed
+    api->SetImage(imagedata, width, height, bytes_per_pixel, bytes_per_line);
+}
+
+void Recogniser::set_image(const char *filename)
+{
+	if (image) {
+	    pixDestroy(&image);
+	    image = NULL;
+	}
+    // Open input image with leptonica library
+	// set self->image, because now we own the image
+    image = pixRead(filename);
+	set_image(image);
+}
+
+void Recogniser::ocr(void)
+{
 #ifdef SIMPLE
     // Get OCR result
     char *outText = api->GetUTF8Text();
@@ -26,8 +73,8 @@ void ocr(const char *filename)
     delete [] outText;
 #else
     api->Recognize(0);
-      tesseract::ResultIterator* ri = api->GetIterator();
-      tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
+      ResultIterator* ri = api->GetIterator();
+      PageIteratorLevel level = tesseract::RIL_WORD;
       if (ri != 0) {
         do {
           const char* word = ri->GetUTF8Text(level);
@@ -39,8 +86,6 @@ void ocr(const char *filename)
         } while (ri->Next(level));
       }
 #endif
+}
 
-    // Destroy used object and release memory
-    api->End();
-    pixDestroy(&image);
 }
