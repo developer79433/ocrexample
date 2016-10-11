@@ -63,8 +63,7 @@ void display_image(const string &name, const Mat &image)
 	cerr
 	<< "Image " << name
 	<< " dims: " << image.size().width << "x" << image.size().height
-	<< " channels: " << image.channels()
-	<< " depth: " << TYPE_TO_DEPTH_NAME(image.type())
+	<< " depth: " << TYPE_TO_DEPTH_NAME(image.type()) << "C" << image.channels()
 	<< endl;
 	imshow(name, image);
 	waitKey(0);
