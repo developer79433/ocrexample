@@ -8,9 +8,6 @@
 #include "debug.h"
 #include "util.h"
 
-// TODO: Use cv::imencode and tesseract::TessBaseAPI::SetImage to communicate via an in-memory buffer
-#define TMP_FILENAME "/tmp/ocr.tiff"
-
 using namespace std;
 using namespace cv;
 using namespace ocr;
@@ -166,7 +163,6 @@ static void process(Mat &image)
 // #ifdef DISPLAY_INTERMEDIATE_IMAGES
 		display_image("Corrected", warped);
 // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
-		imwrite(TMP_FILENAME, warped);
 		vector<uchar> buf;
 		imencode("tiff", warped, buf);
 		Recogniser tess;
