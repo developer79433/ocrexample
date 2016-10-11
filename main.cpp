@@ -3,12 +3,6 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "baseapi.h"
-#include "pageiterator.h"
-#include "resultiterator.h"
-#include "renderer.h"
-#include "platform.h"
-
 #include "distance.h"
 #include "ocr.h"
 #include "debug.h"
