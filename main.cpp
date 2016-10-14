@@ -2,6 +2,9 @@
 #include <cmath>
 
 #include <opencv2/opencv.hpp>
+#include <tesseract/baseapi.h>
+#include <leptonica/allheaders.h>
+#include <leptonica/bmp.h>
 
 #include "distance.h"
 #include "ocr.h"
@@ -14,7 +17,7 @@ using namespace ocr;
 
 #define EDGE_DETECTION_SIZE 500
 #define CONTOUR_COUNT 5
-#if 1
+#if 0
 #define DISPLAY_INTERMEDIATE_IMAGES
 #endif
 
@@ -119,7 +122,7 @@ static void process(Mat &image)
 	});
 	// Find the first roughly quadrilateral contour in the few largest-area contours
 	vector<Point> *quadrilateral = NULL;
-	vector<vector<Point> >::iterator border_iter = find_if(contours.begin(), contours.begin() + CONTOUR_COUNT, [&quadrilateral](vector<Point> &contour) {
+	vector<vector<Point> >::iterator border_iter = find_if(contours.begin(), min(contours.end(), contours.begin() + CONTOUR_COUNT), [&quadrilateral](vector<Point> &contour) {
 		double len = arcLength(contour, true);
 		vector<Point> simplified;
 		approxPolyDP(contour, simplified, 0.02 * len, true);
@@ -160,13 +163,23 @@ static void process(Mat &image)
 		border_arr[2] = (*quadrilateral)[2];
 		border_arr[3] = (*quadrilateral)[3];
 		four_point_transform(image, border_arr, warped);
-// #ifdef DISPLAY_INTERMEDIATE_IMAGES
+#ifdef DISPLAY_INTERMEDIATE_IMAGES
 		display_image("Corrected", warped);
+#endif /* DISPLAY_INTERMEDIATE_IMAGES */
+        Mat warped_grey;
+        cvtColor(warped, warped_grey, COLOR_BGR2GRAY);
+// #ifdef DISPLAY_INTERMEDIATE_IMAGES
+        display_image("Corrected grey", warped_grey);
 // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
 		vector<uchar> buf;
-		imencode("tiff", warped, buf);
+		imencode(".bmp", warped_grey, buf);
+		const unsigned char *data =
+		  (reinterpret_cast<const unsigned char *>(&buf[0]))
+		  + (reinterpret_cast<const struct BMP_FileHeader *>(&buf[0]))->bfOffBits
+		;
 		Recogniser tess;
-		tess.set_image(&buf[0], warped.size().width, warped.size().height, 3, 3 * warped.size().width);
+		tess.set_image(data, warped.size().width, warped.size().height, 1, ROUND_4(warped.size().width));
+		tess.ocr();
 	}
 }
 
