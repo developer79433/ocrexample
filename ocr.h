@@ -23,6 +23,7 @@ public:
 		int bytes_per_pixel,
 		int bytes_per_line
 	);
+	void set_image_bmp(const void *bmp_data);
 	void ocr(void);
 	void set_image(const char *filename);
 };

@@ -2,9 +2,6 @@
 #include <cmath>
 
 #include <opencv2/opencv.hpp>
-#include <tesseract/baseapi.h>
-#include <leptonica/allheaders.h>
-#include <leptonica/bmp.h>
 
 #include "distance.h"
 #include "ocr.h"
@@ -173,12 +170,8 @@ static void process(Mat &image)
 // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
 		vector<uchar> buf;
 		imencode(".bmp", warped_grey, buf);
-		const unsigned char *data =
-		  (reinterpret_cast<const unsigned char *>(&buf[0]))
-		  + (reinterpret_cast<const struct BMP_FileHeader *>(&buf[0]))->bfOffBits
-		;
 		Recogniser tess;
-		tess.set_image(data, warped.size().width, warped.size().height, 1, ROUND_4(warped.size().width));
+		tess.set_image_bmp(&buf[0]);
 		tess.ocr();
 	}
 }

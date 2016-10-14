@@ -1,9 +1,11 @@
+#include <iostream>
+
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
+#include <leptonica/bmp.h>
 
 #include "ocr.h"
-
-#include <iostream>
+#include "util.h"
 
 using namespace std;
 using namespace tesseract;
@@ -55,6 +57,16 @@ void Recogniser::set_image(
 {
 	// Don't set self->image, because it is being bypassed
     api->SetImage(imagedata, width, height, bytes_per_pixel, bytes_per_line);
+}
+
+void Recogniser::set_image_bmp(const void *bmp_data)
+{
+	const unsigned char *ptr =
+	  reinterpret_cast<const unsigned char *>(bmp_data);
+	const struct BMP_FileHeader *hdr = reinterpret_cast<const struct BMP_FileHeader *>(ptr);
+	const struct BMP_InfoHeader *info_hdr = reinterpret_cast<const struct BMP_InfoHeader *>(ptr + sizeof(struct BMP_FileHeader));
+	const unsigned char *pixel_data = ptr + hdr->bfOffBits;
+	set_image(pixel_data, info_hdr->biWidth, info_hdr->biHeight, info_hdr->biPlanes, ROUND_4(info_hdr->biWidth));
 }
 
 void Recogniser::set_image(const char *filename)
