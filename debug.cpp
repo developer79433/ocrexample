@@ -1,33 +1,30 @@
 #include <opencv2/opencv.hpp>
 
 #include "util.h"
+#include "debug.h"
 
 using namespace std;
 using namespace cv;
 
-template <typename T> void dump_array_n(const string &name, const T *pts, unsigned int size)
+template <typename T> void dump_array_n(const string &name, const T *arr, unsigned int size)
 {
 	cerr << name << endl;
-	const T *pt;
-	for (pt = &pts[0]; pt < &pts[size]; pt++) {
-		cerr << *pt << ", ";
+	const T *elem;
+	for (elem = &arr[0]; elem < &arr[size]; elem++) {
+		cerr << *elem << ", ";
 	}
 	cerr << endl;
 }
 
-#define dump_array(name, arr) do { dump_array_n(name, &(arr)[0], ELEMENTSOF(arr)); } while (0)
-
-template <typename T> void dump_point_array_n(const string &name, const Point_<T> *pts, unsigned int size)
+template <typename T> void dump_point_array_n(const string &name, const Point_<T> *arr, unsigned int size)
 {
 	cerr << name << endl;
-	const Point_<T> *pt;
-	for (pt = &pts[0]; pt < &pts[size]; pt++) {
-		cerr << *pt << ", ";
+	const Point_<T> *elem;
+	for (elem = &arr[0]; elem < &arr[size]; elem++) {
+		cerr << *elem << ", ";
 	}
 	cerr << endl;
 }
-
-#define dump_point_array(name, arr) do { dump_point_array_n(name, &(arr)[0], ELEMENTSOF(arr)); } while (0)
 
 template <typename T> void dump_point_vector(const string &name, vector<Point_<T> > &vec)
 {
@@ -36,6 +33,11 @@ template <typename T> void dump_point_vector(const string &name, vector<Point_<T
 		cerr << pt << ", ";
 	});
 	cerr << endl;
+}
+
+void dump_rect(const string &name, const Rect &r)
+{
+	cerr << name << r << endl;
 }
 
 static const char *depth_names[] = {
