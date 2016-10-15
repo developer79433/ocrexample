@@ -52,6 +52,11 @@ Recogniser::Recogniser(const char *lang, const char *data_dir, const char *white
 	if (!api->SetVariable("wordrec_enable_assoc", "F")) {
 		delete_api();
 	}
+#if 0 /* Requires ScrollView */
+	if (!api->SetVariable("interactive_display_mode", "T")) {
+		delete_api();
+	}
+#endif
 	if (whitelist && !api->SetVariable("tessedit_char_whitelist", whitelist)) {
 		delete_api();
 	}
