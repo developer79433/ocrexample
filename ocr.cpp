@@ -12,7 +12,7 @@ using namespace tesseract;
 
 namespace ocr {
 
-Recogniser::Recogniser(const char *data_dir, const char *lang) : api(NULL), image(NULL)
+Recogniser::Recogniser(const char *lang, const char *data_dir, const char *whitelist) : api(NULL), image(NULL)
 {
     api = new TessBaseAPI();
     if (api->Init(data_dir, lang)) {
@@ -23,9 +23,41 @@ Recogniser::Recogniser(const char *data_dir, const char *lang) : api(NULL), imag
 		<< (data_dir || "<default>")
 		<< (data_dir ? "" : "'")
 		<< endl;
-		delete api;
-		api = NULL;
+		delete_api();
     }
+	if (!api->SetVariable("load_system_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_freq_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_unambig_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_punc_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_number_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_fixed_length_dawgs", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_bigram_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("load_bigram_dawg", "F")) {
+		delete_api();
+	}
+	if (!api->SetVariable("wordrec_enable_assoc", "F")) {
+		delete_api();
+	}
+	if (whitelist && !api->SetVariable("tessedit_char_whitelist", whitelist)) {
+		delete_api();
+	}
+	if (!api) {
+		throw("API init failed");
+	}
 }
 
 Recogniser::~Recogniser(void)

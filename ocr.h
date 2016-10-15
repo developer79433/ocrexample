@@ -12,8 +12,12 @@ class Recogniser {
 private:
 	tesseract::TessBaseAPI *api;
 	Pix *image;
+	void delete_api(void) {
+		delete api;
+		api = NULL;
+	};
 public:
-	Recogniser(const char *data_dir = NULL, const char *lang = "eng");
+	Recogniser(const char *lang = "eng", const char *data_dir = NULL, const char *whitelist = NULL);
 	virtual ~Recogniser(void);
 	void set_image(Pix *image);
 	void set_image(
