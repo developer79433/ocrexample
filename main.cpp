@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cmath>
+#include <unistd.h>
+#include <cerrno>
 
 #include <opencv2/opencv.hpp>
 
@@ -11,6 +13,18 @@
 using namespace std;
 using namespace cv;
 using namespace ocr;
+
+std::string getcwd(void) {
+    string result(1024, '\0');
+    while (getcwd(&result[0], result.size()) == 0) {
+        if( errno != ERANGE ) {
+          throw runtime_error(strerror(errno));
+        }
+        result.resize(result.size() * 2);
+    }
+    result.resize(result.find('\0'));
+    return result;
+}
 
 #define EDGE_DETECTION_SIZE 500
 #define CONTOUR_COUNT 5
@@ -163,14 +177,21 @@ static void process(Mat &image)
 #ifdef DISPLAY_INTERMEDIATE_IMAGES
 		display_image("Corrected", warped);
 #endif /* DISPLAY_INTERMEDIATE_IMAGES */
-        Mat warped_grey;
+        Mat warped_grey, thresh;
         cvtColor(warped, warped_grey, COLOR_BGR2GRAY);
+        threshold(warped_grey, thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
 // #ifdef DISPLAY_INTERMEDIATE_IMAGES
         display_image("Corrected grey", warped_grey);
 // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
+        // #ifdef DISPLAY_INTERMEDIATE_IMAGES
+        display_image("Threshold", thresh);
+        // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
 		vector<uchar> buf;
 		imencode(".bmp", warped_grey, buf);
-		Recogniser tess;
+		string data_dir = getcwd();
+		data_dir.append("/tessdata");
+		cerr << "data dir: " << data_dir << endl;
+		Recogniser tess("eng", &data_dir[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=$.()-*");
 		tess.set_image_bmp(&buf[0]);
 		tess.ocr();
 	}
