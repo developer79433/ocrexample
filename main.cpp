@@ -180,14 +180,14 @@ static void process(Mat &image)
         Mat warped_grey, thresh;
         cvtColor(warped, warped_grey, COLOR_BGR2GRAY);
         threshold(warped_grey, thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
-// #ifdef DISPLAY_INTERMEDIATE_IMAGES
+#ifdef DISPLAY_INTERMEDIATE_IMAGES
         display_image("Corrected grey", warped_grey);
-// #endif /* DISPLAY_INTERMEDIATE_IMAGES */
-        // #ifdef DISPLAY_INTERMEDIATE_IMAGES
+#endif /* DISPLAY_INTERMEDIATE_IMAGES */
+// #ifdef DISPLAY_INTERMEDIATE_IMAGES
         display_image("Threshold", thresh);
-        // #endif /* DISPLAY_INTERMEDIATE_IMAGES */
+// #endif /* DISPLAY_INTERMEDIATE_IMAGES */
 		vector<uchar> buf;
-		imencode(".bmp", warped_grey, buf);
+		imencode(".bmp", thresh, buf);
 		string data_dir = getcwd();
 		data_dir.append("/tessdata");
 		cerr << "data dir: " << data_dir << endl;
