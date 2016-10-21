@@ -9,6 +9,7 @@
 #include "ocr.h"
 #include "debug.h"
 #include "util.h"
+#include "recogniser_tesseract.h"
 
 using namespace std;
 using namespace cv;
@@ -191,7 +192,7 @@ static void process(Mat &image)
 		string data_dir = getcwd();
 		data_dir.append("/tessdata");
 		cerr << "data dir: " << data_dir << endl;
-		Recogniser tess("eng", &data_dir[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=$.()-*");
+		RecogniserTesseract tess("eng", &data_dir[0], "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789=$.()-*");
 		tess.set_image_bmp(&buf[0]);
 		tess.ocr();
 	}
