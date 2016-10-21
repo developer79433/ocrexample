@@ -71,3 +71,22 @@ void display_image(const string &name, const Mat &image)
 	waitKey(0);
 	destroyWindow(name);
 }
+
+void drawContourBoundingRects(
+	Mat &image,
+	vector<vector<Point> > &contours,
+	int contourIdx,
+	const Scalar& color,
+	int thickness,
+	int lineType)
+{
+	if (contourIdx < 0) {
+	    for_each(contours.begin(), contours.end(), [&image, color, thickness, lineType](vector<Point> & contour) {
+	        Rect br = boundingRect(contour);
+	        rectangle(image, br, color, thickness, lineType);
+	    });
+	} else {
+        Rect br = boundingRect(contours[contourIdx]);
+        rectangle(image, br, color, thickness, lineType);
+	}
+}
