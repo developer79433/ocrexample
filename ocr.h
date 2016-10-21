@@ -9,6 +9,11 @@ using namespace std;
 namespace ocr {
 
 class Recogniser {
+public:
+	virtual ~Recogniser() {};
+};
+
+class RecogniserTesseract : public Recogniser {
 private:
 	tesseract::TessBaseAPI *api;
 	Pix *image;
@@ -17,8 +22,8 @@ private:
 		api = NULL;
 	};
 public:
-	Recogniser(const char *lang = "eng", const char *data_dir = NULL, const char *whitelist = NULL);
-	virtual ~Recogniser(void);
+	RecogniserTesseract(const char *lang = "eng", const char *data_dir = NULL, const char *whitelist = NULL);
+	virtual ~RecogniserTesseract(void);
 	void set_image(Pix *image);
 	void set_image(
 		const unsigned char *imagedata,

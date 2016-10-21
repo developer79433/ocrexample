@@ -12,7 +12,7 @@ using namespace tesseract;
 
 namespace ocr {
 
-Recogniser::Recogniser(const char *lang, const char *data_dir, const char *whitelist) : api(NULL), image(NULL)
+RecogniserTesseract::RecogniserTesseract(const char *lang, const char *data_dir, const char *whitelist) : api(NULL), image(NULL)
 {
     api = new TessBaseAPI();
     if (api->Init(data_dir, lang)) {
@@ -65,7 +65,7 @@ Recogniser::Recogniser(const char *lang, const char *data_dir, const char *white
 	}
 }
 
-Recogniser::~Recogniser(void)
+RecogniserTesseract::~RecogniserTesseract(void)
 {
 	if (api) {
 		api->End();
@@ -78,13 +78,13 @@ Recogniser::~Recogniser(void)
 	}
 }
 
-void Recogniser::set_image(Pix *image)
+void RecogniserTesseract::set_image(Pix *image)
 {
 	// Don't set self->image, because we don't own it
     api->SetImage(image);
 }
 
-void Recogniser::set_image(
+void RecogniserTesseract::set_image(
 	const unsigned char *imagedata,
 	int width,
 	int height,
@@ -96,7 +96,7 @@ void Recogniser::set_image(
     api->SetImage(imagedata, width, height, bytes_per_pixel, bytes_per_line);
 }
 
-void Recogniser::set_image_bmp(const void *bmp_data)
+void RecogniserTesseract::set_image_bmp(const void *bmp_data)
 {
 	const unsigned char *ptr =
 	  reinterpret_cast<const unsigned char *>(bmp_data);
@@ -106,7 +106,7 @@ void Recogniser::set_image_bmp(const void *bmp_data)
 	set_image(pixel_data, info_hdr->biWidth, info_hdr->biHeight, info_hdr->biPlanes, ROUND_4(info_hdr->biWidth));
 }
 
-void Recogniser::set_image(const char *filename)
+void RecogniserTesseract::set_image(const char *filename)
 {
 	if (image) {
 	    pixDestroy(&image);
@@ -118,7 +118,7 @@ void Recogniser::set_image(const char *filename)
 	set_image(image);
 }
 
-void Recogniser::ocr(void)
+void RecogniserTesseract::ocr(void)
 {
 #ifdef SIMPLE
     // Get OCR result
