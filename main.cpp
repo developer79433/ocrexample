@@ -10,22 +10,11 @@
 #include "debug.h"
 #include "util.h"
 #include "recogniser_tesseract.h"
+#include "getcwd.h"
 
 using namespace std;
 using namespace cv;
 using namespace ocr;
-
-std::string getcwd(void) {
-    string result(1024, '\0');
-    while (getcwd(&result[0], result.size()) == 0) {
-        if( errno != ERANGE ) {
-          throw runtime_error(strerror(errno));
-        }
-        result.resize(result.size() * 2);
-    }
-    result.resize(result.find('\0'));
-    return result;
-}
 
 #define EDGE_DETECTION_SIZE 500
 #define CONTOUR_COUNT 5
